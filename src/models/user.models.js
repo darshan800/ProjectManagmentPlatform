@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
-
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
 const userSchema = new Schema(
   {
     avatar: {
@@ -68,4 +69,53 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+//attaching the built in methods to userschema, instead of writing this logic in
+//contorllers , we can write here only
+userSchema.methods.isPasswordCorrect = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+//with-data token
+//generating access token
+userSchema.methods.generateAccessToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+      email: this.email,
+      username: this.username,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: process.env.ACCESST_TOKEN_EXPIRY,
+    },
+  );
+};
+
+//generating refresh token
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+    },
+  );
+};
+
+//without-data token
+//generating without data tokens by using crypto module
+userSchema.methods.generateTemporaryToken = function () {
+  const unHashedToken = crypto.randomBytes(20).toString("hex");
+
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(unHashedToken)
+    .digest("hex");
+
+  const tokenExpiry = Date.now() + 20 * 60 * 1000; //20 mins
+
+  return { unHashedToken, hashedToken, tokenExpiry };
+};
 export const User = mongoose.model("User", userSchema);
