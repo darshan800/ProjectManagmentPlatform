@@ -63,10 +63,9 @@ const userSchema = new Schema(
 );
 
 //writting pre hooks
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return ;
   this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
 //attaching the built in methods to userschema, instead of writing this logic in

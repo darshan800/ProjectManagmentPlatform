@@ -19,6 +19,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
   }
 };
 
+//registeruser
 const registerUser = asyncHandler(async (req, res) => {
   const { email, password, role, username } = req.body;
 
