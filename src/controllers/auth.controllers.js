@@ -74,4 +74,54 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
-export { registerUser };
+//login
+const login = asyncHandler(async (req, res) => {
+  const { email, username, password } = req.body;
+
+  if (!email) {
+    throw new ApiError(400, "email is required");
+  }
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new ApiError(400, "user does not exist");
+  }
+
+  const isPassworrdValid = await user.isPasswordCorrect(password);
+
+  if (!isPassworrdValid) {
+    throw new ApiError(400, "Inavide credentials");
+  }
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+    user._id,
+  );
+
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -refreshToken -emailVerificationToken -emailVerificationTokenExpiry",
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie("accesstoken", accessToken, options)
+    .cookie("refreshtoken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          user: loggedInUser,
+          accessToken,
+          refreshToken,
+        },
+
+        "user looged in succesfully",
+      ),
+    );
+});
+
+export { registerUser, login };

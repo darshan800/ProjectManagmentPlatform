@@ -1,5 +1,5 @@
 import { validationResult } from "express-validator";
-import { ApiError } from "../utils/api-error";
+import { ApiError } from "../utils/api-error.js";
 
 
 // so the task is , i'll give you some file , you need to extract error from it and
