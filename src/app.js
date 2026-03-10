@@ -9,7 +9,7 @@ app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: "true", limit: "16kb" }));
 app.use(express.static("public"));
 
-app.use(cookieParser()) //cookie-parser
+app.use(cookieParser()); //cookie-parser
 
 // cors configuration
 app.use(
@@ -24,9 +24,7 @@ app.use(
 // import the routes : this things are done after cors and middleware configuration
 //since the export type is default from heathche.router.js file, so we can name anything while importing
 import healthcheckRouter from "./routes/healthcheck.routes.js";
-import authRouter from "./routes/auth.routes.js"
-
-
+import authRouter from "./routes/auth.routes.js";
 
 app.use("/api/v1/healthcheck", healthcheckRouter);
 app.use("/api/v1/auth", authRouter);

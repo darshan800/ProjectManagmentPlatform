@@ -8,6 +8,7 @@ import {
   sendEmail,
 } from "../utils/mail.js";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -262,7 +263,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     };
 
     const { refreshToken: newRefreshToken, accessToken } =
-      await generateAccessAndRefreshTokens(user_id);
+      await generateAccessAndRefreshTokens(user._id);
 
     user.refreshToken = newRefreshToken;
     await user.save();
@@ -286,7 +287,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 //forgot-password
 const forgotPasswordRequest = asyncHandler(async (req, res) => {
   const { email } = req.body;
-  const user = User.findOne({ email });
+  const user = await User.findOne({ email });
 
   if (!user) {
     throw new ApiError(401, "user does not exist");
@@ -302,7 +303,7 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
 
   await sendEmail({
     email: user?.email,
-    subject: "password rest request",
+    subject: "password reset request",
     mailgenContent: forgotPasswordMailgenContent(
       user.username,
       `${process.env.FORGOT_PASSWORD_REDIRECT_URL}/${unHashedToken}`,
@@ -311,7 +312,13 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(200, {}, "password rest mail has been sent on your mail id ");
+    .json(
+      new ApiResponse(
+        200,
+        {},
+        "password reset mail has been sent on your mail id ",
+      ),
+    );
 });
 
 //reset-forgot-password
@@ -350,7 +357,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
   const user = await User.findById(req.user?._id);
 
-  const isPasswordValid = await user.isPassworrdCorrect(oldPassword);
+  const isPasswordValid = await user.isPasswordCorrect(oldPassword);
 
   if (!isPasswordValid) {
     throw new ApiError(400, "inavlid old password");
