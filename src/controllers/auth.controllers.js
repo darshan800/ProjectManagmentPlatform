@@ -316,12 +316,12 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
 
 //reset-forgot-password
 const resetForgotPassword = asyncHandler(async (req, res) => {
-  const { refreshToken } = req.params;
+  const { resetToken } = req.params;
   const { newPassword } = req.body;
 
   let hashedToken = crypto
     .createHash("sha256")
-    .update(refreshToken)
+    .update(resetToken)
     .digest("hex");
 
   const user = await User.findOne({

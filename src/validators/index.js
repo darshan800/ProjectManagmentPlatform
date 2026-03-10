@@ -29,4 +29,34 @@ const userLoginValidator = () => {
     body("password").notEmpty().withMessage("password is required"),
   ];
 };
-export { userRegisterValidator, userLoginValidator };
+
+//user-change current password
+const userChangeCurrentPassword = () => {
+  return [
+    body("oldPassword").notEmpty().withMessage("old password is required"),
+    body("newPassword").notEmpty().withMessage("new password is required"),
+  ];
+};
+
+//user-forgot password validator
+const userForgotPasswordValidator = () => {
+  return [
+    body("email")
+      .notEmpty()
+      .withMessage("email is required")
+      .isEmail()
+      .withMessage("email is invalid"),
+  ];
+};
+
+//user-resetforgot password validator
+const userResetForgotPasswordValidator = () => {
+  return [body("newPassword").notEmpty().withMessage("passwoord is required")];
+};
+export {
+  userRegisterValidator,
+  userLoginValidator,
+  userChangeCurrentPassword,
+  userForgotPasswordValidator,
+  userResetForgotPasswordValidator,
+};
