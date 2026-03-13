@@ -4,7 +4,7 @@ const projectNoteSchema = new Schema(
   {
     project: {
       type: Schema.Types.ObjectId,
-      ref: "project",
+      ref: "Project",
       required: true,
     },
     createdBy: {
