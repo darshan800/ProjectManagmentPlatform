@@ -15,7 +15,65 @@ import crypto from "crypto";
 import { UserRolesEnum } from "../utils/constants.js";
 
 //this route is responsible for getting all the project here as well
-const getProjects = asyncHandler(async (req, res) => {});
+const getProjects = asyncHandler(async (req, res) => {
+  const projects = await ProjectMember.aggregate([
+    {
+      $match: {
+        user: new mongoose.Types.ObjectId(req.user._id),
+      },
+    },
+    {
+      $lookup: {
+        from: "projects",
+        localFields: "projects",
+        foreignField: "_id",
+        as: "projects",
+        pipeline: [
+          {
+            $lookup: {
+              from: "projectMembers",
+              localField: "_id",
+              foreignField: "projects",
+              as: "projectmembers",
+            },
+          },
+          {
+            $addFields: {
+              members: {
+                $size: "$projectmembers",
+              },
+            },
+          },
+          {
+            $unwind: "$project",
+          },
+          {
+            $project: {
+              project: {
+                _id: 1,
+                name: 1,
+                description: 1,
+                members: 1,
+                createdAt: 1,
+                createdBy: 1,
+              },
+
+              role: 1,
+              _id: 0,
+            },
+          },
+        ],
+      },
+    },
+  ]);
+  return res.status(201).json(
+    new ApiResponse(
+      201, 
+      projects,
+      "Projects fetche succesfully"
+    )
+  )
+});
 
 //get project details by id
 const getProjectById = asyncHandler(async (req, res) => {});
