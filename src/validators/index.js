@@ -1,4 +1,5 @@
-import { body } from "express-validator";
+import { body, param } from "express-validator";
+import { AvailableUserRole } from "../utils/constants.js";
 
 //user-registration
 const userRegisterValidator = () => {
@@ -53,10 +54,44 @@ const userForgotPasswordValidator = () => {
 const userResetForgotPasswordValidator = () => {
   return [body("newPassword").notEmpty().withMessage("passwoord is required")];
 };
+
+//create -project validator
+const createProjectValidator = () => {
+  return [
+    body("name").notEmpty().withMessage("name is required"),
+
+    body("description")
+      .notEmpty()
+      .withMessage("description should not be empty for project"),
+  ];
+};
+
+// add members for validators
+const addMembersToProjectValidator = () => {
+  return [
+    param("projectId").isMongoId().withMessage("invalid project Id"),
+    body("email")
+      .trim()
+      .notEmpty()
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Email is invalid"),
+
+    body("role")
+      .trim()
+      .toLowerCase()
+      .notEmpty()
+      .withMessage("role is required")
+      .isIn(AvailableUserRole)
+      .withMessage("The role you provided is does not exist"),
+  ];
+};
 export {
   userRegisterValidator,
   userLoginValidator,
   userChangeCurrentPassword,
   userForgotPasswordValidator,
   userResetForgotPasswordValidator,
+  createProjectValidator,
+  addMembersToProjectValidator,
 };
